@@ -23,6 +23,11 @@
             app:layout_scrollFlags="scroll|enterAlways"
             app:popupTheme="@style/AppTheme.PopupOverlay">
 
+            <Button
+                android:id="@+id/add_playlist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add" />
         </android.support.v7.widget.Toolbar>
 
         <android.support.design.widget.TabLayout

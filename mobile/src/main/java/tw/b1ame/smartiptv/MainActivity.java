@@ -2,6 +2,7 @@ package tw.b1ame.smartiptv;
 
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -10,25 +11,36 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import tw.b1ame.smartiptv.application.App;
+import tw.b1ame.smartiptv.fragments.AddPlaylistDialog;
 import tw.b1ame.smartiptv.fragments.PlaylistFragment;
 import tw.b1ame.smartiptv.models.Interactor;
 import tw.b1ame.smartiptv.models.Playlist;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AddPlaylistDialog.AddPlaylistListener {
     private SectionsPagerAdapter sectionsPagerAdapter;
-    private ViewPager mViewPager;
+    @Bind(R.id.container)
+    ViewPager viewPager;
     private Interactor interactor;
     private List<Playlist> playlists = new ArrayList<>();
+    @Bind(R.id.add_playlist)
+    Button addPlaylist;
+    @Bind(R.id.toolbar)
+    Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
+
         this.interactor = ((App) getApplication()).getInteractor();
 
         setUI();
@@ -44,16 +56,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setUI() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(sectionsPagerAdapter);
 
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(sectionsPagerAdapter);
+        TabLayout tabLayout = ButterKnife.findById(this, R.id.tabs);
+        tabLayout.setupWithViewPager(viewPager);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
+        this.addPlaylist.setOnClickListener(v -> {
+            DialogFragment addPlaylistDialog = new AddPlaylistDialog();
+            addPlaylistDialog.show(getSupportFragmentManager(), "addPlaylistDialog");
+        });
+    }
+
+    @Override
+    public void onUserAddedPlaylist(String name, String url) {
+        this.interactor.getPlayList(url, playlist1 -> {
+            playlist1.setName(name);
+            this.playlists.add(playlist1);
+            this.sectionsPagerAdapter.notifyDataSetChanged();
+        });
     }
 
     @Override
@@ -93,15 +116,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return "SECTION 1";
-                case 1:
-                    return "SECTION 2";
-                case 2:
-                    return "SECTION 3";
-            }
-            return null;
+            return playlists.get(position).getName();
         }
     }
 }
