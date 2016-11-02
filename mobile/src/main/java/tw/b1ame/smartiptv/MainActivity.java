@@ -16,7 +16,7 @@ import android.widget.Button;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import tw.b1ame.smartiptv.application.App;
 import tw.b1ame.smartiptv.fragments.AddPlaylistDialog;
@@ -26,13 +26,17 @@ import tw.b1ame.smartiptv.models.Playlist;
 
 public class MainActivity extends AppCompatActivity implements AddPlaylistDialog.AddPlaylistListener {
     private SectionsPagerAdapter sectionsPagerAdapter;
-    @Bind(R.id.container)
+
+    @BindView(R.id.container)
     ViewPager viewPager;
+
     private Interactor interactor;
     private List<Playlist> playlists = new ArrayList<>();
-    @Bind(R.id.add_playlist)
+
+    @BindView(R.id.add_playlist)
     Button addPlaylist;
-    @Bind(R.id.toolbar)
+
+    @BindView(R.id.toolbar)
     Toolbar toolbar;
 
     @Override
@@ -49,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
     }
 
     private void downloadAndShowFirstPage() {
-        this.interactor.getPlayList("http://iptv.servzp.pp.ua/pl/vimpel/day/128.68.252.62.m3u", playlist1 -> {
+        this.interactor.getPlayList("http://iptv.servzp.pp.ua/list/triolan.m3u", playlist1 -> {
             this.playlists.add(playlist1);
             this.sectionsPagerAdapter.notifyDataSetChanged();
         });

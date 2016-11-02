@@ -13,7 +13,7 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import tw.b1ame.smartiptv.R;
 import tw.b1ame.smartiptv.models.Channel;
@@ -23,7 +23,7 @@ import tw.b1ame.smartiptv.models.Playlist;
 public class PlaylistFragment extends Fragment {
     private Playlist playlist;
 
-    @Bind(R.id.playlist)
+    @BindView(R.id.playlist)
     ListView listView;
 
     public void setPlaylist(Playlist playlist) {

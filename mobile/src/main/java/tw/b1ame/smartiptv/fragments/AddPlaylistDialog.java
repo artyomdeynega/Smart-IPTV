@@ -10,14 +10,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import tw.b1ame.smartiptv.R;
 
 public class AddPlaylistDialog extends DialogFragment {
-    @Bind(R.id.playlist_name)
+    @BindView(R.id.playlist_name)
     EditText playlistName;
-    @Bind(R.id.playlist_url)
+    @BindView(R.id.playlist_url)
     EditText playlistURL;
 
     public AddPlaylistDialog() {
