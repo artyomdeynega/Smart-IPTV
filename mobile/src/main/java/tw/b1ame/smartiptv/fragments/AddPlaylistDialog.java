@@ -35,7 +35,6 @@ public class AddPlaylistDialog extends DialogFragment {
                 .setTitle("Add playlist")
                 .setPositiveButton("Ok",
                         (dialog, which) -> {
-
                             ((AddPlaylistListener) getActivity()).onUserAddedPlaylist(playlistName.getText().toString(), playlistURL.getText().toString());
                         }
                 )

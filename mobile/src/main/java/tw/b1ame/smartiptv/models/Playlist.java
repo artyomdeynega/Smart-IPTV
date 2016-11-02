@@ -5,10 +5,11 @@ import java.util.List;
 public class Playlist {
     private List<Channel> channelList;
     private String name;
+    private String url;
 
-    public Playlist(List<Channel> channelList, String name) {
-        this.channelList = channelList;
+    public Playlist(String name, String url) {
         this.name = name;
+        this.url = url;
     }
 
     public List<Channel> getChannelList() {
@@ -21,5 +22,17 @@ public class Playlist {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setChannelList(List<Channel> channelList) {
+        this.channelList = channelList;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

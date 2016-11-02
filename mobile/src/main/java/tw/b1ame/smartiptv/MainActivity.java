@@ -15,6 +15,7 @@ import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -49,14 +50,18 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
 
         setUI();
 
-        downloadAndShowFirstPage();
+        getAllPlayLists();
     }
 
-    private void downloadAndShowFirstPage() {
-        this.interactor.getPlayList("http://iptv.servzp.pp.ua/list/triolan.m3u", playlist1 -> {
-            this.playlists.add(playlist1);
-            this.sectionsPagerAdapter.notifyDataSetChanged();
-        });
+    private void getAllPlayLists() {
+        Set<String> playListUrls = this.interactor.getPlayListsUrls();
+
+        for (String url : playListUrls) {
+            this.interactor.getPlayList(url, "noname", playlist -> {
+                this.playlists.add(playlist);
+                this.sectionsPagerAdapter.notifyDataSetChanged();
+            });
+        }
     }
 
     private void setUI() {
@@ -76,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
 
     @Override
     public void onUserAddedPlaylist(String name, String url) {
-        this.interactor.getPlayList(url, playlist1 -> {
+        this.interactor.getPlayList(url, name, playlist1 -> {
             playlist1.setName(name);
             this.playlists.add(playlist1);
             this.sectionsPagerAdapter.notifyDataSetChanged();
