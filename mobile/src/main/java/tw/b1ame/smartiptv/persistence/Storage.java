@@ -22,17 +22,6 @@ public class Storage {
         getPreferences().edit().putString(playlist.getName(), playlist.getUrl()).apply();
     }
 
-//    private void cachePlayLists(Collection<Playlist> playListsToStore) {
-//        List<String> playListsUrls = new ArrayList<>();
-//
-//        for (Playlist playlist : playListsToStore) {
-//            playListsUrls.add(playlist.getUrl());
-//        }
-//
-//        SharedPreferences.Editor editor = getPreferences().edit();
-//        editor.putStringSet(Storage.PLAY_LISTS_URLS_KEY, new HashSet<>(playListsUrls)).apply();
-//    }
-
     public Map<String, String> getPlayListUrls() {
         Map<String, ?> nameToUrlCached = getPreferences().getAll();
         Map<String, String> nameToUrlMap = new HashMap<>();
@@ -43,6 +32,10 @@ public class Storage {
         }
 
         return nameToUrlMap;
+    }
+
+    public void removePlaylist(Playlist playlist) {
+        getPreferences().edit().remove(playlist.getName()).apply();
     }
 
     private SharedPreferences getPreferences() {

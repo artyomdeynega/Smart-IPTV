@@ -32,4 +32,8 @@ public class Interactor {
         Map<String, String> playlistsUrls = getPlayListsUrls();
         PlaylistFactory.getPlaylists(playlistsUrls, this.network, playlists -> getAllPlaylistsListener.onGotAllPlaylists(playlists));
     }
+
+    public void removePlaylist(Playlist playlist) {
+        this.storage.removePlaylist(playlist);
+    }
 }
