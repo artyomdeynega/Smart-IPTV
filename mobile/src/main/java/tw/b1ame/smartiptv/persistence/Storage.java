@@ -2,18 +2,15 @@ package tw.b1ame.smartiptv.persistence;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import tw.b1ame.smartiptv.models.Playlist;
 
 public class Storage {
     private static final String PLAY_LISTS_STORAGE = "PLAY_LISTS_STORAGE";
-    private static final String PLAY_LISTS_URLS_KEY = "PLAY_LISTS_URLS_KEY";
 
     private Context context;
 
@@ -22,29 +19,30 @@ public class Storage {
     }
 
     public void storeNewPlaylist(Playlist playlist) {
-        Set<String> urls = getPlayListUrls();
-        urls.add(playlist.getUrl());
-        cachePlayListsUrls(urls);
+        getPreferences().edit().putString(playlist.getName(), playlist.getUrl()).apply();
     }
 
-    private void cachePlayListsUrls(Set<String> urls) {
-        SharedPreferences.Editor editor = getPreferences().edit();
-        editor.putStringSet(Storage.PLAY_LISTS_URLS_KEY, urls).apply();
-    }
+//    private void cachePlayLists(Collection<Playlist> playListsToStore) {
+//        List<String> playListsUrls = new ArrayList<>();
+//
+//        for (Playlist playlist : playListsToStore) {
+//            playListsUrls.add(playlist.getUrl());
+//        }
+//
+//        SharedPreferences.Editor editor = getPreferences().edit();
+//        editor.putStringSet(Storage.PLAY_LISTS_URLS_KEY, new HashSet<>(playListsUrls)).apply();
+//    }
 
-    private void cachePlayLists(Collection<Playlist> playListsToStore) {
-        List<String> playListsUrls = new ArrayList<>();
+    public Map<String, String> getPlayListUrls() {
+        Map<String, ?> nameToUrlCached = getPreferences().getAll();
+        Map<String, String> nameToUrlMap = new HashMap<>();
 
-        for (Playlist playlist : playListsToStore) {
-            playListsUrls.add(playlist.getUrl());
+        for (Map.Entry<String, ?> entry : nameToUrlCached.entrySet()) {
+            Log.d("map values", entry.getKey() + ": " + entry.getValue().toString());
+            nameToUrlMap.put(entry.getKey(), entry.getValue().toString());
         }
 
-        SharedPreferences.Editor editor = getPreferences().edit();
-        editor.putStringSet(Storage.PLAY_LISTS_URLS_KEY, new HashSet<>(playListsUrls)).apply();
-    }
-
-    public Set<String> getPlayListUrls() {
-        return getPreferences().getStringSet(Storage.PLAY_LISTS_URLS_KEY, new HashSet<>());
+        return nameToUrlMap;
     }
 
     private SharedPreferences getPreferences() {
