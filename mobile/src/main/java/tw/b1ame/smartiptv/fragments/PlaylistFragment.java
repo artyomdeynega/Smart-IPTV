@@ -6,10 +6,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -17,15 +19,20 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import tw.b1ame.smartiptv.R;
+import tw.b1ame.smartiptv.application.App;
 import tw.b1ame.smartiptv.models.Channel;
+import tw.b1ame.smartiptv.models.Interactor;
 import tw.b1ame.smartiptv.models.Playlist;
 
 
 public class PlaylistFragment extends Fragment {
     private Playlist playlist;
+    private Interactor interactor;
 
     @BindView(R.id.playlist)
     ListView listView;
+
+    private BaseAdapter channelsAdapter;
 
 //    @BindView(R.id.videoview)
 //    VideoView videoView;
@@ -35,11 +42,11 @@ public class PlaylistFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        ButterKnife.bind(this, view);
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        this.interactor = ((App) getActivity().getApplication()).getInteractor();
 
-        this.listView.setAdapter(new BaseAdapter() {
+        this.channelsAdapter = new BaseAdapter() {
             @Override
             public int getCount() {
                 return playlist.getChannelList().size();
@@ -67,7 +74,22 @@ public class PlaylistFragment extends Fragment {
 
                 return convertView;
             }
-        });
+        };
+    }
+
+    public void onThisFragmentBecameActive(){
+        if (this.playlist.isFavoritesPlaylist()) {
+            this.playlist = this.interactor.getFavoritesPlaylist();
+            this.channelsAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ButterKnife.bind(this, view);
+
+        this.listView.setAdapter(channelsAdapter);
 
         this.listView.setOnItemClickListener((parent, view1, position, id) -> {
             Channel channel = playlist.getChannelList().get(position);
@@ -77,23 +99,42 @@ public class PlaylistFragment extends Fragment {
         this.listView.requestFocus();
         this.listView.setSelection(0);
 
-//        this.listView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-//                Channel channel = playlist.getChannelList().get(i);
-//                playVideoPreview(channel.getUrl());
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> adapterView) {
-//
-//            }
-//        });
+        this.listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+                if (playlist.isFavoritesPlaylist()) {
+                    builder.setPositiveButton("Ок", (dialogInterface, i1) -> {
+                        ((PlaylistFragmentEventsListener) getActivity()).onUserDeletedChannelToFavorites(playlist.getChannelList().get(i));
+                        playlist.getChannelList().remove(i);
+                        channelsAdapter.notifyDataSetChanged();
+                    });
+                    builder.setNegativeButton("Отмена", (dialogInterface, i1) -> {
+                        dialogInterface.dismiss();
+                    });
+                    builder.setMessage("Удалить канал из избранного?");
+                } else {
+                    builder.setPositiveButton("Ок", (dialogInterface, i1) -> {
+                        ((PlaylistFragmentEventsListener) getActivity()).onUserAddedChannelToFavorites(playlist.getChannelList().get(i));
+                    });
+                    builder.setNegativeButton("Отмена", (dialogInterface, i1) -> {
+                        dialogInterface.dismiss();
+                    });
+                    builder.setMessage("Добавить канал в избранное?");
+                }
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+                return true;
+            }
+        });
 
         this.listView.setItemsCanFocus(true);
     }
 
-    public void proceedKeyEvent(KeyEvent keyEvent){
+    public void proceedKeyEvent(KeyEvent keyEvent) {
         this.listView.requestFocus();
     }
 
@@ -123,5 +164,10 @@ public class PlaylistFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View contentView = inflater.inflate(R.layout.fragment_playlist, container, false);
         return contentView;
+    }
+
+    public interface PlaylistFragmentEventsListener {
+        public void onUserAddedChannelToFavorites(Channel channel);
+        public void onUserDeletedChannelToFavorites(Channel channel);
     }
 }

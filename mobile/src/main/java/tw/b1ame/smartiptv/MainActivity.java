@@ -14,7 +14,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,10 +24,11 @@ import butterknife.ButterKnife;
 import tw.b1ame.smartiptv.application.App;
 import tw.b1ame.smartiptv.fragments.AddPlaylistDialog;
 import tw.b1ame.smartiptv.fragments.PlaylistFragment;
+import tw.b1ame.smartiptv.models.Channel;
 import tw.b1ame.smartiptv.models.Interactor;
 import tw.b1ame.smartiptv.models.Playlist;
 
-public class MainActivity extends AppCompatActivity implements AddPlaylistDialog.AddPlaylistListener {
+public class MainActivity extends AppCompatActivity implements AddPlaylistDialog.AddPlaylistListener, PlaylistFragment.PlaylistFragmentEventsListener {
     private SectionsPagerAdapter playlistsPagerAdapter;
 
     @BindView(R.id.container)
@@ -35,12 +36,6 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
 
     private Interactor interactor;
     private List<Playlist> playlists = new ArrayList<>();
-
-    @BindView(R.id.add_playlist)
-    Button addPlaylist;
-
-    @BindView(R.id.del_playlist)
-    Button delPlaylist;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -61,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
     private void getAllSavedPlaylists() {
         this.interactor.getAllStoredPlaylists(playlists1 -> {
             this.playlists.clear();
+            this.playlists.add(this.interactor.getFavoritesPlaylist());
             this.playlists.addAll(playlists1);
             this.playlistsPagerAdapter.notifyDataSetChanged();
         });
@@ -71,21 +67,43 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
 
         playlistsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(playlistsPagerAdapter);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                playlistsPagerAdapter.getRegisteredFragment(position).onThisFragmentBecameActive();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
 
         TabLayout tabLayout = ButterKnife.findById(this, R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
+    }
 
-        this.addPlaylist.setOnClickListener(v -> {
-            DialogFragment addPlaylistDialog = new AddPlaylistDialog();
-            addPlaylistDialog.show(getSupportFragmentManager(), "addPlaylistDialog");
-        });
+    private void addPlaylist() {
+        DialogFragment addPlaylistDialog = new AddPlaylistDialog();
+        addPlaylistDialog.show(getSupportFragmentManager(), "addPlaylistDialog");
+    }
 
-        this.delPlaylist.setOnClickListener(view -> {
-            Playlist playlistToRemove = this.playlists.get(this.viewPager.getCurrentItem());
+    private void removePlaylist() {
+        int currentItem = this.viewPager.getCurrentItem();
+        if (currentItem == 0) {
+            Toast.makeText(this, "Нельзя удалить избранное!", Toast.LENGTH_LONG).show();
+        } else {
+            viewPager.setCurrentItem(currentItem - 1);
+            Playlist playlistToRemove = this.playlists.get(currentItem);
             this.interactor.removePlaylist(playlistToRemove);
             this.playlists.remove(playlistToRemove);
             this.playlistsPagerAdapter.notifyDataSetChanged();
-        });
+        }
     }
 
     private PlaylistFragment getTopPlaylistFragment() {
@@ -98,6 +116,18 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
             this.playlists.add(playlist1);
             this.playlistsPagerAdapter.notifyDataSetChanged();
         });
+    }
+
+    @Override
+    public void onUserAddedChannelToFavorites(Channel channel) {
+        this.interactor.addFavoriteChannel(channel);
+        Toast.makeText(this, "Канал добавлен в избранное!", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onUserDeletedChannelToFavorites(Channel channel) {
+        this.interactor.delFavoriteChannel(channel);
+        Toast.makeText(this, "Канал удален из избранного!", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -136,6 +166,12 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
+            return true;
+        } else if (id == R.id.action_add_playlist) {
+            addPlaylist();
+            return true;
+        } else if (id == R.id.action_remove_playlist) {
+            removePlaylist();
             return true;
         }
 
@@ -182,5 +218,10 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
         public CharSequence getPageTitle(int position) {
             return playlists.get(position).getName();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+//        super.onBackPressed();
     }
 }

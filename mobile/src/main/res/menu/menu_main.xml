@@ -3,8 +3,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="tw.b1ame.smartiptv.MainActivity">
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_add_playlist"
         android:orderInCategory="100"
+        android:title="Добавить плейлист"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_remove_playlist"
+        android:orderInCategory="200"
+        android:title="Удалить плейлист"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="300"
         android:title="@string/action_settings"
         app:showAsAction="never" />
 </menu>

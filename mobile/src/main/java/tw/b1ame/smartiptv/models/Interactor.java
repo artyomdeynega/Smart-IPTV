@@ -36,4 +36,19 @@ public class Interactor {
     public void removePlaylist(Playlist playlist) {
         this.storage.removePlaylist(playlist);
     }
+
+    public Playlist getFavoritesPlaylist() {
+        Playlist favPlaylist = new Playlist("Избранное", "");
+        favPlaylist.setFavoritesPlaylist(true);
+        favPlaylist.setChannelList(this.storage.getFavoriteChannels());
+        return favPlaylist;
+    }
+
+    public void addFavoriteChannel(Channel channel) {
+        this.storage.addFavoriteChannel(channel);
+    }
+
+    public void delFavoriteChannel(Channel channel) {
+        this.storage.delFavoriteChannel(channel);
+    }
 }

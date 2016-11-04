@@ -6,6 +6,7 @@ public class Playlist {
     private List<Channel> channelList;
     private String name;
     private String url;
+    private boolean isFavoritesPlaylist = false;
 
     public Playlist(String name, String url) {
         this.name = name;
@@ -34,5 +35,13 @@ public class Playlist {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public boolean isFavoritesPlaylist() {
+        return isFavoritesPlaylist;
+    }
+
+    public void setFavoritesPlaylist(boolean favoritesPlaylist) {
+        isFavoritesPlaylist = favoritesPlaylist;
     }
 }
