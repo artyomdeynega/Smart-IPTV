@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,6 +83,15 @@ public class PlaylistFragment extends Fragment {
         }
     }
 
+    public void refreshChannels(){
+        if (this.playlist.isFavoritesPlaylist()) {
+            this.playlist = this.interactor.getFavoritesPlaylist();
+            this.channelsAdapter.notifyDataSetChanged();
+        } else {
+            //TODO refresh common playlist's channel
+        }
+    }
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -134,9 +142,6 @@ public class PlaylistFragment extends Fragment {
         this.listView.setItemsCanFocus(true);
     }
 
-    public void proceedKeyEvent(KeyEvent keyEvent) {
-        this.listView.requestFocus();
-    }
 
 //    private void playVideoPreview(String url) {
 //        MediaController mediaController = new MediaController(getActivity());

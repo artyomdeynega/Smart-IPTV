@@ -1,6 +1,7 @@
 package tw.b1ame.smartiptv;
 
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -22,13 +23,14 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import tw.b1ame.smartiptv.application.App;
+import tw.b1ame.smartiptv.fragments.AddCustomFavoriteChannelDialog;
 import tw.b1ame.smartiptv.fragments.AddPlaylistDialog;
 import tw.b1ame.smartiptv.fragments.PlaylistFragment;
 import tw.b1ame.smartiptv.models.Channel;
 import tw.b1ame.smartiptv.models.Interactor;
 import tw.b1ame.smartiptv.models.Playlist;
 
-public class MainActivity extends AppCompatActivity implements AddPlaylistDialog.AddPlaylistListener, PlaylistFragment.PlaylistFragmentEventsListener {
+public class MainActivity extends AppCompatActivity implements AddPlaylistDialog.AddPlaylistListener, PlaylistFragment.PlaylistFragmentEventsListener, AddCustomFavoriteChannelDialog.AddCustomFavoriteChannelListener {
     private SectionsPagerAdapter playlistsPagerAdapter;
 
     @BindView(R.id.container)
@@ -39,6 +41,9 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+
+    @BindView(R.id.fab)
+    FloatingActionButton fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,11 +91,30 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
 
         TabLayout tabLayout = ButterKnife.findById(this, R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
+
+        fab.setOnClickListener(view -> {
+            if (this.viewPager.getCurrentItem() == 0) {
+                showAddCustomFavoriteChannel();
+            } else {
+                showAddPlaylist();
+            }
+        });
     }
 
-    private void addPlaylist() {
+    private void showAddPlaylist() {
         DialogFragment addPlaylistDialog = new AddPlaylistDialog();
         addPlaylistDialog.show(getSupportFragmentManager(), "addPlaylistDialog");
+    }
+
+    private void showAddCustomFavoriteChannel() {
+        DialogFragment addPlaylistDialog = new AddCustomFavoriteChannelDialog();
+        addPlaylistDialog.show(getSupportFragmentManager(), "addFavoriteChannelDialog");
+    }
+
+    @Override
+    public void onUserAddedCustomFavChannel(String name, String url) {
+        this.interactor.addCustomFavoriteChannel(name, url);
+        this.playlistsPagerAdapter.getRegisteredFragment(0).refreshChannels();
     }
 
     private void removePlaylist() {
@@ -168,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
         if (id == R.id.action_settings) {
             return true;
         } else if (id == R.id.action_add_playlist) {
-            addPlaylist();
+            showAddPlaylist();
             return true;
         } else if (id == R.id.action_remove_playlist) {
             removePlaylist();
@@ -218,6 +242,7 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
         public CharSequence getPageTitle(int position) {
             return playlists.get(position).getName();
         }
+
     }
 
     @Override

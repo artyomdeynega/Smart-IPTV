@@ -39,6 +39,10 @@ public class PlaylistFactory {
                 }
             });
         }
+
+        if (playlists.size() == 0) {
+            getAllPlaylistsListener.onGotAllPlaylists(playlists);
+        }
     }
 
     public interface GetAllPlaylistsListener {

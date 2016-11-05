@@ -31,7 +31,7 @@ public class AddPlaylistDialog extends DialogFragment {
         ButterKnife.bind(this, contentView);
 
         return new AlertDialog.Builder(getActivity())
-//                .setIcon(R.drawable.alert_dialog_icon)
+                .setIcon(R.drawable.dialog_add)
                 .setTitle("Add playlist")
                 .setPositiveButton("Ok",
                         (dialog, which) -> {
