@@ -46,7 +46,7 @@ public class Interactor {
 
     public void addCustomFavoriteChannel(String name, String url){
         Channel channel = new Channel(name, url);
-        this.storage.addFavoriteChannel(channel);
+        addFavoriteChannel(channel);
     }
 
     public void addFavoriteChannel(Channel channel) {

@@ -1,6 +1,5 @@
 package tw.b1ame.smartiptv;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
@@ -30,7 +29,6 @@ import tw.b1ame.smartiptv.fragments.PlaylistFragment;
 import tw.b1ame.smartiptv.models.Channel;
 import tw.b1ame.smartiptv.models.Interactor;
 import tw.b1ame.smartiptv.models.Playlist;
-import tw.b1ame.smartiptv.utils.ChannelUtils;
 
 public class MainActivity extends AppCompatActivity implements AddPlaylistDialog.AddPlaylistListener, PlaylistFragment.PlaylistFragmentEventsListener, AddCustomFavoriteChannelDialog.AddCustomFavoriteChannelListener {
     private SectionsPagerAdapter playlistsPagerAdapter;
@@ -61,26 +59,11 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
     }
 
     private void getAllSavedPlaylists() {
-        AsyncTask<Void, Void, Void> checkChannelALiveTask = new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                for (Channel channel : playlists.get(0).getChannelList()) {
-                    boolean isAlive = ChannelUtils.isChannelAlive(channel.getUrl());
-
-                    runOnUiThread(() -> Toast.makeText(getApplicationContext(), String.format("Channel %s alive=%b", channel.getName(), isAlive), Toast.LENGTH_SHORT).show());
-                }
-
-                return null;
-            }
-        };
-
         this.interactor.getAllStoredPlaylists(playlists1 -> {
             this.playlists.clear();
             this.playlists.add(this.interactor.getFavoritesPlaylist());
             this.playlists.addAll(playlists1);
             this.playlistsPagerAdapter.notifyDataSetChanged();
-
-            checkChannelALiveTask.execute();
         });
     }
 
@@ -88,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
         setSupportActionBar(toolbar);
 
         playlistsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        viewPager.setAdapter(playlistsPagerAdapter);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -105,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
 
             }
         });
+        viewPager.setAdapter(playlistsPagerAdapter);
 
         TabLayout tabLayout = ButterKnife.findById(this, R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);

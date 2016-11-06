@@ -5,15 +5,17 @@ import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 
-public class ChannelUtils {
-    private static final int TIME_OUT = 5000;
+import tw.b1ame.smartiptv.models.Channel;
 
-    public static boolean isChannelAlive(String channelUrl) {
+public class ChannelUtils {
+    private static final int TIME_OUT = 2500;
+
+    public static boolean isChannelAlive(Channel channel) {
         try {
             HttpURLConnection.setFollowRedirects(false);
 
             HttpURLConnection con =
-                    (HttpURLConnection) new URL(channelUrl).openConnection();
+                    (HttpURLConnection) new URL(channel.getUrl()).openConnection();
             con.setConnectTimeout(TIME_OUT);
             con.setReadTimeout(TIME_OUT);
             con.setRequestMethod("HEAD");
@@ -26,4 +28,5 @@ public class ChannelUtils {
             return true;    //Unexpected end of stream means this channel is online!
         }
     }
+
 }
