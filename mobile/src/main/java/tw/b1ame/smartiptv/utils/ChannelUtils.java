@@ -8,7 +8,7 @@ import java.net.URL;
 import tw.b1ame.smartiptv.models.Channel;
 
 public class ChannelUtils {
-    private static final int TIME_OUT = 2500;
+    private static final int TIME_OUT = 750;
 
     public static boolean isChannelAlive(Channel channel) {
         try {
@@ -21,10 +21,10 @@ public class ChannelUtils {
             con.setRequestMethod("HEAD");
             return (con.getResponseCode() == HttpURLConnection.HTTP_OK);    //This channel is online!
         } catch (SocketTimeoutException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             return false;   //This channel is offline
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             return true;    //Unexpected end of stream means this channel is online!
         }
     }

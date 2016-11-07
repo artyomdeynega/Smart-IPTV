@@ -17,6 +17,7 @@ public class Storage {
     private static final String FAV_CHANNELS_STORAGE = "FAV_CHANNELS_STORAGE";
 
     private Context context;
+    private List<Channel> favoriteChannelsCache = new ArrayList<>();
 
     public Storage(Context context) {
         this.context = context;
@@ -46,23 +47,34 @@ public class Storage {
         return context.getSharedPreferences(key, Context.MODE_PRIVATE);
     }
 
+    private void clearFavoritesCache() {
+        this.favoriteChannelsCache= new ArrayList<>();
+    }
+
     public List<Channel> getFavoriteChannels() {
-        Map<String, ?> favChannels = getPreferences(Storage.FAV_CHANNELS_STORAGE).getAll();
-        List<Channel> channels = new ArrayList<>();
+        if (this.favoriteChannelsCache.size() > 0) {
+            return new ArrayList<>(this.favoriteChannelsCache);
+        } else {
+            Map<String, ?> favChannels = getPreferences(Storage.FAV_CHANNELS_STORAGE).getAll();
+            List<Channel> channels = new ArrayList<>();
 
-        for (Map.Entry<String, ?> entry : favChannels.entrySet()) {
-            Channel channel = new Channel(entry.getKey(), entry.getValue().toString());
-            channels.add(channel);
+            for (Map.Entry<String, ?> entry : favChannels.entrySet()) {
+                Channel channel = new Channel(entry.getKey(), entry.getValue().toString());
+                channels.add(channel);
+            }
+
+            this.favoriteChannelsCache.addAll(channels);
+            return channels;
         }
-
-        return channels;
     }
 
-    public void addFavoriteChannel(Channel channel){
+    public void addFavoriteChannel(Channel channel) {
         getPreferences(Storage.FAV_CHANNELS_STORAGE).edit().putString(channel.getName(), channel.getUrl()).apply();
+        clearFavoritesCache();
     }
 
-    public void delFavoriteChannel(Channel channel){
+    public void removeFavoriteChannel(Channel channel) {
         getPreferences(Storage.FAV_CHANNELS_STORAGE).edit().remove(channel.getName()).apply();
+        clearFavoritesCache();
     }
 }

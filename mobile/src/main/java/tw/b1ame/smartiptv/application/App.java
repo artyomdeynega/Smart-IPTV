@@ -4,7 +4,7 @@ import android.app.Application;
 
 import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
-import tw.b1ame.smartiptv.models.Interactor;
+import tw.b1ame.smartiptv.interaction.Interactor;
 
 public class App extends Application {
     private Interactor interactor;

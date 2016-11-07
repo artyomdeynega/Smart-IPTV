@@ -3,7 +3,6 @@ package tw.b1ame.smartiptv.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -20,13 +19,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import tw.b1ame.smartiptv.R;
 import tw.b1ame.smartiptv.application.App;
+import tw.b1ame.smartiptv.interaction.GlobalEvent;
+import tw.b1ame.smartiptv.interaction.GlobalEventsListener;
+import tw.b1ame.smartiptv.interaction.Interactor;
 import tw.b1ame.smartiptv.models.Channel;
-import tw.b1ame.smartiptv.models.Interactor;
 import tw.b1ame.smartiptv.models.Playlist;
-import tw.b1ame.smartiptv.utils.ChannelUtils;
 
 
-public class PlaylistFragment extends Fragment {
+public class PlaylistFragment extends Fragment implements GlobalEventsListener {
     private Playlist playlist;
     private Interactor interactor;
 
@@ -34,7 +34,6 @@ public class PlaylistFragment extends Fragment {
     ListView listView;
 
     private BaseAdapter channelsAdapter;
-    private CheckChannelsAvailabilityTask checkChannelAvailabilityTask;
 
 //    @BindView(R.id.videoview)
 //    VideoView videoView;
@@ -46,8 +45,6 @@ public class PlaylistFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.interactor = ((App) getActivity().getApplication()).getInteractor();
-
         this.channelsAdapter = new BaseAdapter() {
             @Override
             public int getCount() {
@@ -95,8 +92,20 @@ public class PlaylistFragment extends Fragment {
                 return convertView;
             }
         };
-
         refreshChannels();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        this.interactor = ((App) getActivity().getApplication()).getInteractor();
+        this.interactor.addGlobalEventsListener(this);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        this.interactor.removeGlobalEventsListener(this);
     }
 
     public void onThisFragmentBecameActive() {
@@ -105,15 +114,8 @@ public class PlaylistFragment extends Fragment {
 
     public void refreshChannels() {
         if (this.playlist.isFavoritesPlaylist()) {
-            if (this.checkChannelAvailabilityTask != null) {
-                this.checkChannelAvailabilityTask.cancel(true);
-            }
-
             this.playlist = this.interactor.getFavoritesPlaylist();
             this.channelsAdapter.notifyDataSetChanged();
-
-            this.checkChannelAvailabilityTask = new CheckChannelsAvailabilityTask();
-            this.checkChannelAvailabilityTask.execute(this.playlist);
         } else {
             //TODO refresh common playlist's channel
         }
@@ -140,7 +142,6 @@ public class PlaylistFragment extends Fragment {
             if (playlist.isFavoritesPlaylist()) {
                 builder.setPositiveButton("Ок", (dialogInterface, i1) -> {
                     ((PlaylistFragmentEventsListener) getActivity()).onUserDeletedChannelToFavorites(playlist.getChannelList().get(i));
-                    playlist.getChannelList().remove(i);
                     channelsAdapter.notifyDataSetChanged();
                 });
                 builder.setNegativeButton("Отмена", (dialogInterface, i1) -> {
@@ -191,29 +192,25 @@ public class PlaylistFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View contentView = inflater.inflate(R.layout.fragment_playlist, container, false);
-        return contentView;
+        return inflater.inflate(R.layout.fragment_playlist, container, false);
+    }
+
+    @Override
+    public void onGlobalEvent(GlobalEvent event) {
+        switch (event) {
+            case ON_FAVORITES_CHANGED:
+                refreshChannels();
+                break;
+
+            case ON_FAVORITES_UPDATED:
+                this.channelsAdapter.notifyDataSetChanged();
+                break;
+        }
     }
 
     public interface PlaylistFragmentEventsListener {
         public void onUserAddedChannelToFavorites(Channel channel);
 
         public void onUserDeletedChannelToFavorites(Channel channel);
-    }
-
-    private class CheckChannelsAvailabilityTask extends AsyncTask<Playlist, Void, Void> {
-        @Override
-        protected Void doInBackground(Playlist... playlists) {
-            for (Channel channel : playlists[0].getChannelList()) {
-                channel.setOnlineStatus(ChannelUtils.isChannelAlive(channel) ? Channel.OnlineStatus.ONLINE : Channel.OnlineStatus.OFFLINE);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            channelsAdapter.notifyDataSetChanged();
-        }
     }
 }

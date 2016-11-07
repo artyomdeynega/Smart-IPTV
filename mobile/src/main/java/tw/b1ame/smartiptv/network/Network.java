@@ -12,7 +12,7 @@ public class Network {
     }
 
     public void downloadPlaylistAsStrings(String url, final PlaylistDownloadListener listener) {
-        DownloadTask downloadTask = new DownloadTask(appContext, listener::onPlaylistDownloaded);
+        DownloadPlaylistTask downloadTask = new DownloadPlaylistTask(appContext, listener::onPlaylistDownloaded);
         downloadTask.execute(url);
     }
 

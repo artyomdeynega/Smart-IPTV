@@ -27,7 +27,7 @@ import tw.b1ame.smartiptv.fragments.AddCustomFavoriteChannelDialog;
 import tw.b1ame.smartiptv.fragments.AddPlaylistDialog;
 import tw.b1ame.smartiptv.fragments.PlaylistFragment;
 import tw.b1ame.smartiptv.models.Channel;
-import tw.b1ame.smartiptv.models.Interactor;
+import tw.b1ame.smartiptv.interaction.Interactor;
 import tw.b1ame.smartiptv.models.Playlist;
 
 public class MainActivity extends AppCompatActivity implements AddPlaylistDialog.AddPlaylistListener, PlaylistFragment.PlaylistFragmentEventsListener, AddCustomFavoriteChannelDialog.AddCustomFavoriteChannelListener {
@@ -114,7 +114,6 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
     @Override
     public void onUserAddedCustomFavChannel(String name, String url) {
         this.interactor.addCustomFavoriteChannel(name, url);
-        this.playlistsPagerAdapter.getRegisteredFragment(0).refreshChannels();
     }
 
     private void removePlaylist() {
@@ -130,13 +129,9 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
         }
     }
 
-    private PlaylistFragment getTopPlaylistFragment() {
-        return this.playlistsPagerAdapter.getRegisteredFragment(viewPager.getCurrentItem());
-    }
-
     @Override
     public void onUserAddedPlaylist(String name, String url) {
-        this.interactor.getPlayList(url, name, playlist1 -> {
+        this.interactor.addPlayList(url, name, playlist1 -> {
             this.playlists.add(playlist1);
             this.playlistsPagerAdapter.notifyDataSetChanged();
         });
@@ -144,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements AddPlaylistDialog
 
     @Override
     public void onUserAddedChannelToFavorites(Channel channel) {
-        this.interactor.addFavoriteChannel(channel);
+        this.interactor.addCustomFavoriteChannel(channel.getName(), channel.getUrl());
         Toast.makeText(this, "Канал добавлен в избранное!", Toast.LENGTH_LONG).show();
     }
 
