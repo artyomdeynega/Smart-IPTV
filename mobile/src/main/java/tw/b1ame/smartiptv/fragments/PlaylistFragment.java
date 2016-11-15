@@ -15,6 +15,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import tw.b1ame.smartiptv.R;
@@ -28,7 +30,9 @@ import tw.b1ame.smartiptv.models.Playlist;
 
 public class PlaylistFragment extends Fragment implements GlobalEventsListener {
     private Playlist playlist;
-    private Interactor interactor;
+
+    @Inject
+    Interactor interactor;
 
     @BindView(R.id.playlist)
     ListView listView;
@@ -45,6 +49,7 @@ public class PlaylistFragment extends Fragment implements GlobalEventsListener {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         this.channelsAdapter = new BaseAdapter() {
             @Override
             public int getCount() {
@@ -98,7 +103,7 @@ public class PlaylistFragment extends Fragment implements GlobalEventsListener {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        this.interactor = ((App) getActivity().getApplication()).getInteractor();
+        ((App) getActivity().getApplication()).getAppComponent().inject(this);
         this.interactor.addGlobalEventsListener(this);
     }
 

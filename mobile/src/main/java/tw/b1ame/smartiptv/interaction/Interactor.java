@@ -1,13 +1,14 @@
 package tw.b1ame.smartiptv.interaction;
 
-import android.content.Context;
-
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
+import tw.b1ame.smartiptv.application.App;
 import tw.b1ame.smartiptv.models.Channel;
 import tw.b1ame.smartiptv.models.GetPlaylistListener;
 import tw.b1ame.smartiptv.models.Playlist;
@@ -17,15 +18,17 @@ import tw.b1ame.smartiptv.persistence.Storage;
 import tw.b1ame.smartiptv.utils.CheckChannelsAvailabilityTask;
 
 public class Interactor {
-    private Network network;
-    private Storage storage;
+    @Inject
+    Network network;
+    @Inject
+    Storage storage;
+
     private List<WeakReference<GlobalEventsListener>> globalEventsListeners = new ArrayList<>();
 
     private CheckChannelsAvailabilityTask checkFavChannelsTask = new CheckChannelsAvailabilityTask();
 
-    public Interactor(Context context) {
-        this.network = new Network(context);
-        this.storage = new Storage(context);
+    public Interactor() {
+        App.getAppComponent().inject(this);
     }
 
     public void addGlobalEventsListener(GlobalEventsListener listener) {
